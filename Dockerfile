@@ -15,7 +15,7 @@ RUN uv sync --frozen --no-dev
 COPY app.py config.py gemini.py config.yaml ./
 
 # Expose the port
-EXPOSE 8000
+EXPOSE 5680
 
 # Run the application
-CMD ["uv", "run", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uv", "run", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "5680"]

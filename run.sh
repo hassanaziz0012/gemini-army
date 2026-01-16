@@ -12,7 +12,7 @@ docker run -d \
     --name "$CONTAINER_NAME" \
     --restart unless-stopped \
     --env-file .env \
-    -p 8000:8000 \
+    -p 5680:5680 \
     "$IMAGE_NAME"
 
-echo "Container '$CONTAINER_NAME' is now running on port 8000"
+echo "Container '$CONTAINER_NAME' is now running on port 5680"
