@@ -1,7 +1,7 @@
 #!/bin/bash
 # Test the /generate endpoint
 
-BASE_URL="${BASE_URL:-http://localhost:8000}"
+BASE_URL="${BASE_URL:-https://gemini-army.vercel.app}"
 API_KEY=""
 PROMPT=""
 MODEL=""
