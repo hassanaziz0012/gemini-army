@@ -98,7 +98,10 @@ def ask_gemini(prompt: str, model: str | GeminiModel) -> GeminiResponse:
 
     Raises:
         ValueError: If the model is not in the accepted models list.
+        google.api_core.exceptions.ResourceExhausted: If all API keys are rate limited.
     """
+    from google.api_core.exceptions import ResourceExhausted
+
     # Convert enum to string if needed
     model_name = model.value if isinstance(model, GeminiModel) else model
 
@@ -108,39 +111,53 @@ def ask_gemini(prompt: str, model: str | GeminiModel) -> GeminiResponse:
             f"Model '{model_name}' not in accepted models: {config.accepted_models}"
         )
 
-    # Get API key and create client
-    api_key = get_next_api_key()
-    client = genai.Client(api_key=api_key)
+    # Maximum retries is the number of available API keys
+    max_retries = len(_api_keys) if _api_keys else config.n_api_keys
+    last_exception = None
 
-    # Generate content
-    response = client.models.generate_content(
-        model=model_name,
-        contents=prompt,
-    )
+    for attempt in range(max_retries):
+        # Get API key and create client
+        api_key = get_next_api_key()
+        client = genai.Client(api_key=api_key)
 
-    # Extract usage metadata if available
-    usage_metadata = None
-    if hasattr(response, "usage_metadata") and response.usage_metadata:
-        usage_metadata = {
-            "prompt_token_count": getattr(
-                response.usage_metadata, "prompt_token_count", None
-            ),
-            "candidates_token_count": getattr(
-                response.usage_metadata, "candidates_token_count", None
-            ),
-            "total_token_count": getattr(
-                response.usage_metadata, "total_token_count", None
-            ),
-        }
+        try:
+            # Generate content
+            response = client.models.generate_content(
+                model=model_name,
+                contents=prompt,
+            )
 
-    # Extract finish reason if available
-    finish_reason = None
-    if response.candidates and len(response.candidates) > 0:
-        finish_reason = str(response.candidates[0].finish_reason)
+            # Extract usage metadata if available
+            usage_metadata = None
+            if hasattr(response, "usage_metadata") and response.usage_metadata:
+                usage_metadata = {
+                    "prompt_token_count": getattr(
+                        response.usage_metadata, "prompt_token_count", None
+                    ),
+                    "candidates_token_count": getattr(
+                        response.usage_metadata, "candidates_token_count", None
+                    ),
+                    "total_token_count": getattr(
+                        response.usage_metadata, "total_token_count", None
+                    ),
+                }
 
-    return GeminiResponse(
-        text=response.text,
-        model=model_name,
-        usage_metadata=usage_metadata,
-        finish_reason=finish_reason,
-    )
+            # Extract finish reason if available
+            finish_reason = None
+            if response.candidates and len(response.candidates) > 0:
+                finish_reason = str(response.candidates[0].finish_reason)
+
+            return GeminiResponse(
+                text=response.text,
+                model=model_name,
+                usage_metadata=usage_metadata,
+                finish_reason=finish_reason,
+            )
+
+        except ResourceExhausted as e:
+            # 429 Too Many Requests - try next API key
+            last_exception = e
+            continue
+
+    # All API keys exhausted, raise the last exception
+    raise last_exception
