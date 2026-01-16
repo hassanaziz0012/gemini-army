@@ -112,6 +112,8 @@ def ask_gemini(prompt: str, model: str | GeminiModel) -> GeminiResponse:
     api_key = get_next_api_key()
     client = genai.Client(api_key=api_key)
 
+    
+
     # Generate content
     response = client.models.generate_content(
         model=model_name,
