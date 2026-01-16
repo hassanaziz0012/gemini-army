@@ -1,16 +1,10 @@
-# Python-generated files
+.vercel/
+.venv/
+venv/
 __pycache__/
-*.py[oc]
-build/
-dist/
-wheels/
-*.egg-info
-
-# Virtual environments
-.venv
-
-# Environment variables
-.env
-
-# Vercel
-.vercel
+*.pyc
+*.pyo
+*.pyd
+.Python
+.DS_Store
+.env*
