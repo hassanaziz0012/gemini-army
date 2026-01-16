@@ -1,0 +1,5 @@
+accepted_models:
+  - gemini-3-flash-preview
+
+# Number of API keys to load (GEMINI_API_KEY_1, GEMINI_API_KEY_2, etc.)
+n_api_keys: 3
