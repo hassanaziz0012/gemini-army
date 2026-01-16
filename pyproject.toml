@@ -13,4 +13,4 @@ dependencies = [
 ]
 
 [tool.vercel.scripts]
-build = "install_pydantic.sh"
+build = "./install_pydantic.sh"
