@@ -86,12 +86,15 @@ def get_next_api_key() -> str:
     return key
 
 
-def ask_gemini(prompt: str, model: str | GeminiModel) -> GeminiResponse:
+def ask_gemini(
+    prompt: str, model: str | GeminiModel, system_prompt: str | None = None
+) -> GeminiResponse:
     """Send a prompt to Gemini and get a response.
 
     Args:
         prompt: The prompt to send to Gemini.
         model: The model to use (either GeminiModel enum or string).
+        system_prompt: Optional system prompt to guide the model's behavior.
 
     Returns:
         GeminiResponse containing the response text and metadata.
@@ -121,10 +124,18 @@ def ask_gemini(prompt: str, model: str | GeminiModel) -> GeminiResponse:
         client = genai.Client(api_key=api_key)
 
         try:
+            # Prepare configuration
+            generate_config = None
+            if system_prompt:
+                generate_config = genai.types.GenerateContentConfig(
+                    system_instruction=system_prompt
+                )
+
             # Generate content
             response = client.models.generate_content(
                 model=model_name,
                 contents=prompt,
+                config=generate_config,
             )
 
             # Extract usage metadata if available

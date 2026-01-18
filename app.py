@@ -72,6 +72,7 @@ class GenerateRequest(BaseModel):
 
     prompt: str
     model: str | None = None  # Optional, defaults to first accepted model
+    system_prompt: str | None = None  # Optional system prompt
 
 
 class GenerateResponse(BaseModel):
@@ -107,7 +108,9 @@ async def generate(request: GenerateRequest) -> GenerateResponse:
         )
 
     try:
-        response: GeminiResponse = ask_gemini(prompt=request.prompt, model=model)
+        response: GeminiResponse = ask_gemini(
+            prompt=request.prompt, model=model, system_prompt=request.system_prompt
+        )
 
         return GenerateResponse(
             text=response.text,
